@@ -3,6 +3,7 @@
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,6 +21,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('companies', CompanyController::class);
+
+Route::resource('users', UserController::class);
 
 Route::get('/get-municipalities', [LocationController::class, 'getMunicipalities'])->name('get-municipalities');
 

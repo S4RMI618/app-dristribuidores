@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('email');
             $table->string('phone');
             $table->string('address');
+            $table->unsignedBigInteger('company_id');
             $table->timestamps();
 
-            $table->unsignedBigInteger('company_id');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
         });
         
