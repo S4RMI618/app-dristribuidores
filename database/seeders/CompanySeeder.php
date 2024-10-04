@@ -18,8 +18,8 @@ class CompanySeeder extends Seeder
             'name' => 'Sarmiento S.A.S.',
             'phone' => '123456789',
             'address' => 'Calle Falsa 123',
-            'department' => 'Departamento Ejemplo',
-            'municipality' => 'Municipio Ejemplo',
+            'department' => 'Tolima',
+            'municipality' => 'Ibagué',
         ]);
     }
 }

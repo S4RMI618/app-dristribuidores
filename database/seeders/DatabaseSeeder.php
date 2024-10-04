@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RoleSeeder::class);
 
         User::factory()->create([
-            'name' => 'hugo',
+            'name' => 'Hugo Sarmiento',
             'email' => 'huessabe@gmail.com',
             'password' => Hash::make('sarmi618'),
             'role_id'=> 1,
