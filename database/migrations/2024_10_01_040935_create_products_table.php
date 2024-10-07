@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('company_id');
             $table->string('name');
             $table->string('code')->unique(); // Código único del producto
             $table->decimal('base_price', 10, 2); // Precio del producto
-            $table->decimal('tax rate', 10, 2); // tasa impuestos del producto
+            $table->decimal('tax_rate', 10, 2); // tasa impuestos del producto
+            $table->unsignedBigInteger('company_id');
             $table->timestamps();
             $table->foreign('company_id')->references('id')->on('companies');
         });

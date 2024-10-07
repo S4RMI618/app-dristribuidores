@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Database\Seeders\CustomerDetailSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -18,6 +19,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call(CompanySeeder::class);
         $this->call(RoleSeeder::class);
+        $this->call(ProductSeeder::class);
+        $this->call(CustomerDetailSeeder::class);
 
         User::factory()->create([
             'name' => 'Hugo Sarmiento',

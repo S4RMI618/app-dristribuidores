@@ -22,4 +22,9 @@ class CustomerDetail extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class); // Un cliente puede tener muchas órdenes
+    }
 }

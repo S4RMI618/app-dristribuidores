@@ -15,15 +15,32 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
-                        {{ __('Users') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.index')">
-                        {{ __('Companies') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('customer-details.index')" :active="request()->routeIs('customer-details.index')">
-                        {{ __('Customers') }}
-                    </x-nav-link>
+
+                    <!-- Mostrar solo si el usuario es Administrador (role_id = 1) -->
+                    @if (Auth::user()->role_id === 1)
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
+                            {{ __('Users') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.index')">
+                            {{ __('Companies') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('customer-details.index')" :active="request()->routeIs('customer-details.index')">
+                            {{ __('Customers') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')">
+                            {{ __('Orders') }}
+                        </x-nav-link>
+                    @endif
+
+                    <!-- Mostrar solo si el usuario es Distribuidor (role_id = 2) -->
+                    @if (Auth::user()->role_id === 2)
+                        <x-nav-link :href="route('customer-details.index')" :active="request()->routeIs('customer-details.index')">
+                            {{ __('Customers') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')">
+                            {{ __('Orders') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -50,7 +67,6 @@
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
@@ -79,15 +95,32 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
-                {{ __('Users') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.index')">
-                {{ __('Companies') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('customer-details.index')" :active="request()->routeIs('customer-details.index')">
-                {{ __('Customers') }}
-            </x-responsive-nav-link>
+            
+            <!-- Mostrar solo si es Administrador -->
+            @if (Auth::user()->role_id === 1)
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
+                    {{ __('Users') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.index')">
+                    {{ __('Companies') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('customer-details.index')" :active="request()->routeIs('customer-details.index')">
+                    {{ __('Customers') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')">
+                    {{ __('Orders') }}
+                </x-responsive-nav-link>
+            @endif
+
+            <!-- Mostrar solo si es Distribuidor -->
+            @if (Auth::user()->role_id === 2)
+                <x-responsive-nav-link :href="route('customer-details.index')" :active="request()->routeIs('customer-details.index')">
+                    {{ __('Customers') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')">
+                    {{ __('Orders') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -105,7 +138,6 @@
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">

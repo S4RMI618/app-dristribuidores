@@ -13,13 +13,16 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id'); // Referencia al usuario que creó la orden
+            $table->unsignedBigInteger('customer_id'); // Añadido para referencia al cliente
             $table->decimal('subtotal', 10, 2);
-            $table->decimal('tax', 10, 2); // Impuestos
+            $table->decimal('total_tax', 10, 2); // Impuestos
             $table->decimal('total', 10, 2);
-            $table->string('status')->default('pending'); // Estados: pending, billed
+            $table->enum('status', ['pendiente', 'facturado'])->default('pendiente');// Estados: pending, billed
             $table->timestamps();
-            $table->foreign('user_id')->references('id')->on('users');
+            
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('customer_id')->references('id')->on('customer_details')->onDelete('cascade');
         });
     }
 

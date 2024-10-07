@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('total_tax', 10, 2);
             $table->decimal('total', 10, 2);
             $table->timestamps();
+            
             $table->foreign('order_id')->references('id')->on('orders');
             $table->foreign('product_id')->references('id')->on('products');
         });
