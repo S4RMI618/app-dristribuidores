@@ -32,6 +32,10 @@ Route::middleware('auth')->group(function () {
 
 });
 
+/* Creación de productos */
+Route::post('/products/store', [ProductController::class, 'store'])->name('products.store');   
+Route::get('/products/get', [ProductController::class, 'getProducts'])->name('products.get');
+
 /* Rutas secundarias */
 Route::get('/get-municipalities', [LocationController::class, 'getMunicipalities'])->name('get-municipalities');
 Route::get('/products/search', [ProductController::class, 'searchProducts'])->name('products.search');

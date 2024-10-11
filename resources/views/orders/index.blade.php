@@ -5,12 +5,6 @@
         </h2>
     </x-slot>
 
-    @if (session('success'))
-        <div class="mt-6">
-            <x-auth-session-status :status="session('success')" class="text-center" />
-        </div>
-    @endif
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -19,12 +13,13 @@
                         {{ __('Lista de Órdenes') }}
                     </h3>
 
-                    @if(Auth::user()->role->name === 'Admin' || Auth::user()->role->name === 'Distributor')
+                    @if (Auth::user()->role->name === 'Admin' || Auth::user()->role->name === 'Distributor')
                         <a href="{{ route('orders.create') }}"
-                        class="bg-blue-500 hover:bg-blue-600 text-black px-4 py-2 rounded font-medium text-sm">Crear Nueva Orden</a>
+                            class="bg-blue-500 hover:bg-blue-600 text-black px-4 py-2 rounded font-medium text-sm">Crear
+                            Nueva Orden</a>
                     @endif
                 </div>
-                
+
                 <div class="border-t border-gray-200 p-4">
                     <div class="overflow-x-auto">
                         <table class="w-full divide-y divide-gray-200 table-auto">
@@ -33,18 +28,21 @@
                                     <th scope="col"
                                         class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         ID Orden</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Creador</th>
+                                    @if (Auth::user()->role->name === 'Admin')
+                                        <th scope="col"
+                                            class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Creador
+                                        </th>
+                                    @endif
                                     <th scope="col"
                                         class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Cliente</th> <!-- Nueva columna para Cliente -->
                                     <th scope="col"
                                         class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Subtotal</th>
-                                    <th scope="col"
+                                    {{-- <th scope="col"
                                         class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Impuestos</th>
+                                        Impuestos</th> --}}
                                     <th scope="col"
                                         class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Total</th>
@@ -58,36 +56,45 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($orders as $order)
-                                    <tr class="hover:bg-gray-100 cursor-pointer" onclick="window.location='{{ route('orders.show', $order) }}'">
+                                    <tr class="hover:bg-gray-100 cursor-pointer"
+                                        onclick="window.location='{{ route('orders.show', $order) }}'">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                                             {{ $order->id }}
                                         </td>
+                                        @if (Auth::user()->role->name === 'Admin')
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                                {{ $order->user->name }}
+                                            </td>
+                                        @endif
+
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                                            {{ $order->user->name }} <!-- Asegúrate de que tengas la relación correcta -->
+                                            {{ $order->customer ? $order->customer->full_name : 'No asignado' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                                            {{ $order->customer ? $order->customer->full_name : 'No asignado' }} <!-- Nueva columna para Cliente -->
-                                        </td>
+
+
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                                             ${{ number_format($order->subtotal, 2) }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                                            ${{ number_format($order->total_tax, 2) }} <!-- Campo actualizado -->
-                                        </td>
+                                        {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                                            ${{ number_format($order->total_tax, 2) }} 
+                                        </td> --}}
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                                             ${{ number_format($order->total, 2) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                                             {{ ucfirst($order->status) }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex justify-center gap-2">
-                                            
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-sm font-medium flex justify-center gap-2">
+
                                             <a href="{{ route('orders.edit', $order->id) }}"
-                                                class="text-yellow-600 hover:bg-yellow-900">Editar</a>
-                                            <form action="{{ route('orders.destroy', $order->id) }}" method="POST" style="display:inline;">
+                                                class="text-blue-600 hover:text-blue-900">Editar</a>
+                                            <form action="{{ route('orders.destroy', $order->id) }}" method="POST"
+                                                style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
+                                                <button type="submit"
+                                                    class="text-red-600 hover:text-red-900">Eliminar</button>
                                             </form>
                                         </td>
                                     </tr>

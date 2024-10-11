@@ -11,7 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Excluir la ruta /products/store y get de la verificación CSRF
+        $middleware->validateCsrfTokens(except: [
+            '/products/store', 
+            '/products/get',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

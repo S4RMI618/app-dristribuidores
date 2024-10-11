@@ -30,5 +30,12 @@ class DatabaseSeeder extends Seeder
             'company_id' => 1,
         ]);
 
+        User::factory()->create([
+            'name' => 'Usuario Distribuidor',
+            'email' => 'distribuidor@gmail.com',
+            'password' => Hash::make('sarmi618'),
+            'role_id'=> 2,
+            'company_id' => 1,
+        ]);
     }
 }

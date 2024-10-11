@@ -28,7 +28,7 @@
                         <div class="mt-4">
                             <x-input-label for="product_search" :value="__('Buscar Productos')" />
                             <input type="text" id="product_search" name="product_search"
-                                class="block mt-1 w-full rounded-md" placeholder="Buscar productos..."
+                                class="block mt-1 w-full rounded-md" placeholder="Escriba el producto..."
                                 oninput="filterProducts()" />
                             <div id="product_list" class="mt-2 border border-gray-200 rounded-md overflow-hidden"></div>
                         </div>
@@ -45,7 +45,7 @@
                         <template id="product-template">
                             <div class="product-item flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
                                 <span class="product-name font-medium"></span>
-                                <span class="customer-name font-medium ml-4"></span> <!-- Nueva columna para el cliente -->
+                                {{-- <span class="customer-name font-medium ml-4"></span> --}} <!-- cliente -->
                                 <div class="flex items-center">
                                     <label for="quantity" class="mr-2">Cantidad:</label>
                                     <input type="number" name="quantities[]"
@@ -103,7 +103,7 @@
 
             // Set product name, ID y customer ID
             template.querySelector('.product-name').textContent = `${product.name} - ${product.code}`;
-            template.querySelector('.customer-name').textContent = selectedCustomer; // Mostrar nombre del cliente
+            /* template.querySelector('.customer-name').textContent = selectedCustomer; // Mostrar nombre del cliente */
             template.querySelector('.product-input').value = product.id;
             template.querySelector('.customer-input').value = customerSelect.value; // Guardar el ID del cliente
 
