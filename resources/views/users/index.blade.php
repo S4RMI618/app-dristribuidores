@@ -5,21 +5,15 @@
         </h2>
     </x-slot>
 
-    @if (session('success'))
-    <div class="mt-6">
-        <x-auth-session-status :status="session('success')" class="text-center" />
-    </div>
-    @endif
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                <div class="p-4 py-5 sm:px-6 flex justify-between">
+                <div class="p-4 py-5 sm:px-6 flex justify-between items-center">
                     <h3 class="text-lg leading-6 font-medium text-gray-900">
                         Lista de Usuarios
                     </h3>
                     <a href="{{ route('users.create') }}"
-                        class="bg-blue-500 hover:bg-blue-600 text-black px-4 py-2 rounded font-medium text-sm">Crear
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded font-medium text-sm">Crear
                         Nuevo Usuario</a>
                 </div>
                 <div class="border-t border-gray-200 p-4">

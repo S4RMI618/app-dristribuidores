@@ -14,24 +14,24 @@
                         @method('PUT')
 
                         <!-- Selección del Cliente -->
-
-                        <div>
-                            <x-input-label for="customer_id" :value="__('Seleccionar Cliente')" />
-                            <select id="customer_id" name="customer_id" class="block mt-1 w-full rounded-md" required>
-                                <option value="">{{ __('Seleccione un cliente') }}</option>
-                                @foreach ($customers as $customer)
-                                    <option value="{{ $customer->id }}"
-                                        {{ $customer->id == $order->customer_id ? 'selected' : '' }}>
-                                        {{ $customer->full_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('customer_id')" class="mt-2" />
+                        <div class="mt-4">
+                            <x-input-label for="customer_search" :value="__('Cliente')" />
+                            <input type="text" id="customer_search" name="customer_search"
+                                class="block mt-1 w-full rounded-md"
+                                placeholder="Escriba el nombre o identificación del cliente..."
+                                value="{{ $order->customer->full_name }} - {{ $order->customer->identification }}"
+                                oninput="filterCustomers()" />
+                            <div id="customer_list" class="mt-2 border border-gray-200 rounded-md overflow-hidden">
+                            </div>
                         </div>
 
-                        <div class="block mt-1">
-                            <label for="status" class="block text-sm font-medium text-gray-700">Estado</label>
-                            <select id="status" name="status" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" required>
+                        <!-- Campo oculto para almacenar el cliente seleccionado -->
+                        <input type="hidden" id="customer_id" name="customer_id" value="{{ $order->customer_id }}">
+
+                        <!-- Estado de la Orden -->
+                        <div class="mt-4">
+                            <x-input-label for="status" :value="__('Estado')" />
+                            <select id="status" name="status" class="block mt-1 w-full rounded-md p-2" required>
                                 <option value="pendiente" {{ $order->status === 'pendiente' ? 'selected' : '' }}>Pendiente</option>
                                 <option value="facturado" {{ $order->status === 'facturado' ? 'selected' : '' }}>Facturado</option>
                             </select>
@@ -41,22 +41,46 @@
                         <div class="mt-4">
                             <x-input-label for="product_search" :value="__('Buscar Productos')" />
                             <input type="text" id="product_search" name="product_search"
-                                class="block mt-1 w-full rounded-md" placeholder="Buscar productos..."
+                                class="block mt-1 w-full rounded-md" placeholder="Escriba el producto..."
                                 oninput="filterProducts()" />
                             <div id="product_list" class="mt-2 border border-gray-200 rounded-md overflow-hidden"></div>
                         </div>
 
-                        <!-- Selección de productos y cantidades -->
+                        <!-- Detalles del producto seleccionado -->
+                        <div id="product_details" class="mt-4 hidden">
+                            <h3 class="text-lg font-medium">{{ __('Agregar Producto') }}</h3>
+                            <div class="mt-2 p-4 border border-gray-200 rounded-md bg-gray-50">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium" id="selected_product_name"></p>
+                                        <p>Precio: $<span id="selected_product_price"></span></p>
+                                        <p>Impuestos: $<span id="selected_product_tax"></span></p>
+                                        <p>Total: $<span id="selected_product_total"></span></p>
+                                    </div>
+                                    <div>
+                                        <label for="selected_product_quantity" class="block">Cantidad:</label>
+                                        <input type="number" id="selected_product_quantity" name="quantity"
+                                            class="block w-16 rounded-md" min="1" value="1"
+                                            oninput="updateTotal()">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <button type="button" onclick="addProductToOrder()"
+                                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                        {{ __('Agregar Producto') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de productos seleccionados -->
                         <div class="mt-4">
                             <x-input-label for="selected_products" :value="__('Productos Seleccionados')" />
-                            <div id="selected_products_list" class="block mt-1 w-full rounded-md">
-                                <!-- Aquí se agregarán los productos seleccionados -->
-
+                            <div id="selected_products_list"
+                                class="mt-2 border border-gray-200 rounded-md overflow-hidden">
                                 @foreach ($order->products as $product)
-                                    <div
-                                        class="product-item flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
-                                        <span class="product-name font-medium">{{ $product->name }} -
-                                            {{ $product->code }}</span>
+                                    <div class="product-item flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
+                                        <span class="product-name font-medium">{{ $product->name }} - {{ $product->code }}</span>
                                         <div class="flex items-center">
                                             <label for="quantity" class="mr-2">Cantidad:</label>
                                             <input type="number" name="quantities[]"
@@ -69,94 +93,143 @@
                                         </div>
                                     </div>
                                 @endforeach
-
                             </div>
                         </div>
 
-                        <!-- Template para agregar productos seleccionados -->
-                        <template id="product-template">
-                            <div class="product-item flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
-                                <span class="product-name font-medium"></span>
-                                <div class="flex items-center">
-                                    <label for="quantity" class="mr-2">Cantidad:</label>
-                                    <input type="number" name="quantities[]"
-                                        class="quantity-input block w-16 rounded-md border border-gray-300 px-2 py-1"
-                                        min="1" value="1">
-                                    <input type="hidden" name="products[]" value="" class="product-input">
-                                    <button type="button"
-                                        class="remove-product ml-4 text-red-600 hover:text-red-800">Eliminar</button>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- Botón para guardar -->
-                        <div class="flex justify-end mt-4">
-                            <x-primary-button>
-                                {{ __('Actualizar Orden') }}
-                            </x-primary-button>
+                        <div class="mt-6">
+                            <x-primary-button type="submit">{{ __('Actualizar Orden') }}</x-primary-button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Template para productos seleccionados -->
+    <template id="product-template">
+        <div class="product-item flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
+            <span class="product-name font-medium"></span>
+            <div class="flex items-center">
+                <label for="quantity" class="mr-2">Cantidad:</label>
+                <input type="number" name="quantities[]"
+                    class="quantity-input block w-16 rounded-md border border-gray-300 px-2 py-1" min="1"
+                    value="1">
+                <input type="hidden" name="products[]" class="product-input">
+                <button type="button" class="remove-product ml-4 text-red-600 hover:text-red-800">Eliminar</button>
+            </div>
+        </div>
+    </template>
 </x-app-layout>
 
 <script>
+    let selectedProduct = null;
+
+    // Función para filtrar clientes
+    function filterCustomers() {
+        let query = document.getElementById('customer_search').value;
+
+        if (query.length > 1) {
+            fetch(`/customers/search?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    let customerList = document.getElementById('customer_list');
+                    customerList.innerHTML = ''; // Limpiar lista anterior
+
+                    data.forEach(customer => {
+                        let div = document.createElement('div');
+                        div.textContent = `${customer.full_name} - ${customer.identification}`;
+                        div.classList.add('p-2', 'cursor-pointer', 'hover:bg-gray-200');
+                        div.addEventListener('click', function() {
+                            selectCustomer(customer);
+                        });
+                        customerList.appendChild(div);
+                    });
+                });
+        }
+    }
+
+    // Función para seleccionar cliente
+    function selectCustomer(customer) {
+        document.getElementById('customer_id').value = customer.id;
+        document.getElementById('customer_search').value = `${customer.full_name} - ${customer.identification}`;
+        document.getElementById('customer_list').innerHTML = '';
+    }
+
     // Función para filtrar productos
     function filterProducts() {
-        const searchInput = document.getElementById('product_search');
-        const filter = searchInput.value.toLowerCase();
-        const productList = document.getElementById('product_list');
-        productList.innerHTML = '';
+        let query = document.getElementById('product_search').value;
 
-        // Aquí debes agregar lógica para mostrar productos que coincidan con el filtro
-        const products = @json($products);
-        products.forEach(product => {
-            if (product.name.toLowerCase().includes(filter) || product.code.toLowerCase().includes(filter)) {
-                const productItem = document.createElement('div');
-                productItem.className = 'product-item border p-2 mt-1 cursor-pointer';
-                productItem.innerText = `${product.name} - ${product.code}`;
-                productItem.onclick = () => addProductToSelected(product.id, product.name);
-                productList.appendChild(productItem);
-            }
+        if (query.length > 1) {
+            fetch(`/products/search?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    let productList = document.getElementById('product_list');
+                    productList.innerHTML = ''; // Limpiar lista anterior
+
+                    data.forEach(product => {
+                        let div = document.createElement('div');
+                        div.textContent = `${product.name} - ${product.code}`;
+                        div.classList.add('p-2', 'cursor-pointer', 'hover:bg-gray-200');
+                        div.addEventListener('click', function() {
+                            showProductDetails(product);
+                        });
+                        productList.appendChild(div);
+                    });
+                });
+        }
+    }
+
+    // Mostrar los detalles del producto seleccionado
+    function showProductDetails(product) {
+        selectedProduct = product;
+        document.getElementById('selected_product_name').textContent = `${product.name} - ${product.code}`;
+        document.getElementById('selected_product_price').textContent = product.base_price;
+        document.getElementById('selected_product_tax').textContent = product.tax_rate;
+        updateTotal();
+        document.getElementById('product_details').classList.remove('hidden');
+    }
+
+    // Actualizar el total al cambiar la cantidad
+    function updateTotal() {
+        let quantity = document.getElementById('selected_product_quantity').value;
+        let total = (parseFloat(selectedProduct.base_price) + parseFloat(selectedProduct.tax_rate)) * quantity;
+        document.getElementById('selected_product_total').textContent = total.toFixed(2);
+    }
+
+    // Agregar producto a la lista de productos seleccionados
+    function addProductToOrder() {
+        if (!selectedProduct) {
+            console.error('No hay un producto seleccionado');
+            return;
+        }
+
+        let quantity = document.getElementById('selected_product_quantity').value;
+        let selectedProductsList = document.getElementById('selected_products_list');
+
+        let template = document.getElementById('product-template');
+        let newProductItem = document.importNode(template.content, true);
+
+        newProductItem.querySelector('.product-name').textContent = `${selectedProduct.name} - ${selectedProduct.code}`;
+        newProductItem.querySelector('.product-input').value = selectedProduct.id;
+        newProductItem.querySelector('.quantity-input').value = quantity;
+
+        newProductItem.querySelector('.remove-product').addEventListener('click', function() {
+            this.closest('.product-item').remove();
         });
-    }
 
-    // Función para agregar productos seleccionados
-    function addProductToSelected(id, name) {
-        const productTemplate = document.getElementById('product-template').content.cloneNode(true);
-        const productName = productTemplate.querySelector('.product-name');
-        const productInput = productTemplate.querySelector('.product-input');
+        selectedProductsList.appendChild(newProductItem);
 
-        productName.innerText = name;
-        productInput.value = id;
-
-        document.getElementById('selected_products_list').appendChild(productTemplate);
-
-        // Limpiar el campo de búsqueda
-        document.getElementById('product_search').value = '';
+        // Limpiar y resetear
         document.getElementById('product_list').innerHTML = '';
+        document.getElementById('product_search').value = '';
+        document.getElementById('product_details').classList.add('hidden');
+        selectedProduct = null;
     }
 
-    // Función para eliminar productos de la lista seleccionada
-    document.getElementById('selected_products_list').addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-product')) {
+    // Agregar event listener para eliminar productos
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('remove-product')) {
             e.target.closest('.product-item').remove();
         }
     });
 </script>
-
-
-
-
-
-
-
-{{-- <div>
-    <p>{{$order}}</p>
-
-    <p>{{$customers}}</p>
-    <p>{{$products}}</p>
-</div>
- --}}

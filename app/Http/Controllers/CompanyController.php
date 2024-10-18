@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
-use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 
 class CompanyController extends Controller
@@ -14,16 +13,6 @@ class CompanyController extends Controller
     }
 
     public function create(){
-        /* $company = new Company();
-        $company->nit = '123456789';
-        $company->name = 'Company 1';
-        $company->phone = '1234567';
-        $company->address = 'Calle 123';
-        $company->department = 'Antioquia';
-        $company->municipality = 'Medellin';
-        $company->save();
-        return $company; */
-
         return view('companies.create');
     }
 
@@ -39,8 +28,8 @@ class CompanyController extends Controller
 
         Company::create($request->all());
 
-        return redirect()->route('companies.index')
-            ->with('success', 'Empresa creada exitosamente.');
+        $this->flashNotification('success', 'Empresa Creada', 'La empresa ha sido creada exitosamente.');
+        return redirect()->route('companies.index');
     }
 
     public function show($id){
@@ -65,14 +54,23 @@ class CompanyController extends Controller
 
         $company->update($validated);
 
-        return redirect()->route('companies.index')
-            ->with('success', 'Empresa actualizada exitosamente.');
+        $this->flashNotification('success', 'Empresa Actualizada', 'La empresa ha sido actualizada exitosamente.');
+        return redirect()->route('companies.index');
     }
 
     public function destroy(Company $company){
         $company->delete();
-        return redirect()->route('companies.index')
-            ->with('success', 'Empresa eliminada exitosamente.');
+
+        $this->flashNotification('success', 'Empresa Eliminada', 'La empresa ha sido eliminada exitosamente.');
+        return redirect()->route('companies.index');
+    }
+
+    private function flashNotification($type, $title, $message)
+    {
+        session()->flash('notification', [
+            'type' => $type,
+            'title' => $title,
+            'message' => $message
+        ]);
     }
 }
-

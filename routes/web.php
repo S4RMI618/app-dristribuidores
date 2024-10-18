@@ -40,5 +40,9 @@ Route::get('/products/get', [ProductController::class, 'getProducts'])->name('pr
 Route::get('/get-municipalities', [LocationController::class, 'getMunicipalities'])->name('get-municipalities');
 Route::get('/products/search', [ProductController::class, 'searchProducts'])->name('products.search');
 
+/* Busqueda de Customers */
+Route::get('/customers/search', [CustomerDetailController::class, 'search']);
+
+
 
 require __DIR__ . '/auth.php';

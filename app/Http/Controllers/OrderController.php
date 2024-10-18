@@ -9,6 +9,7 @@ use App\Models\OrderProduct;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -46,7 +47,7 @@ class OrderController extends Controller
 
 
     public function store(Request $request)
-    {
+    {   
         // Validar los datos enviados desde el formulario
         $request->validate([
             'customer_id' => 'required|exists:customer_details,id',
@@ -99,7 +100,7 @@ class OrderController extends Controller
         $order->total = $subtotal + $totalTax;
         $order->save();
 
-        $this->flashNotification('success', 'Orden Creada', 'La orden ha sido creada exitosamente.');
+        $this->flashNotification('success', 'Orden Creada', 'La orden ha sido actualizada exitosamente.');
         return redirect()->route('orders.index');
     }
 
@@ -182,8 +183,13 @@ class OrderController extends Controller
 
     public function destroy($id)
     {
+        // Buscar la orden por su ID
         $order = Order::findOrFail($id);
 
+        // Eliminar todos los productos asociados a la orden
+        $order->products()->detach();
+
+        // Ahora eliminar la orden
         $order->delete();
 
         $this->flashNotification('success', 'Orden Eliminada', 'La orden ha sido eliminada exitosamente.');

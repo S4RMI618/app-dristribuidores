@@ -8,16 +8,14 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                <div class="p-4 py-5 sm:px-6 flex justify-between">
+                <div class="p-4 py-5 sm:px-6 flex justify-between items-center">
                     <h3 class="text-lg leading-6 font-medium text-gray-900">
                         {{ __('Lista de Órdenes') }}
                     </h3>
+                    <a href="{{ route('orders.create') }}"
+                        class="bg-blue-500 hover:bg-blue-800 text-white px-4 py-2 rounded font-medium text-sm">Crear
+                        Nueva Orden</a>
 
-                    @if (Auth::user()->role->name === 'Admin' || Auth::user()->role->name === 'Distributor')
-                        <a href="{{ route('orders.create') }}"
-                            class="bg-blue-500 hover:bg-blue-600 text-black px-4 py-2 rounded font-medium text-sm">Crear
-                            Nueva Orden</a>
-                    @endif
                 </div>
 
                 <div class="border-t border-gray-200 p-4">
@@ -66,15 +64,13 @@
                                                 {{ $order->user->name }}
                                             </td>
                                         @endif
-
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                                             {{ $order->customer ? $order->customer->full_name : 'No asignado' }}
                                         </td>
-
-
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                                             ${{ number_format($order->subtotal, 2) }}
                                         </td>
+                                        {{-- IMPUESTOS --}}
                                         {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                                             ${{ number_format($order->total_tax, 2) }} 
                                         </td> --}}

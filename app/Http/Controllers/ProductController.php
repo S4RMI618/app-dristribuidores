@@ -46,9 +46,9 @@ class ProductController extends Controller
 
             $this->createProducts($products);
 
-            return response()->json(['message' => 'Productos creados exitosamente.']);
+            return response()->json(['status' => true, 'message' => 'Productos creados exitosamente.']);
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
     }
 

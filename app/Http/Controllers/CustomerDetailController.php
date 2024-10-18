@@ -19,6 +19,7 @@ class CustomerDetailController extends Controller
         $companies = Company::all();
         return view('customer-details.create', compact('companies'));
     }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -32,9 +33,10 @@ class CustomerDetailController extends Controller
 
         CustomerDetail::create($validatedData);
 
-        return redirect()->route('customer-details.index')
-            ->with('success', 'Cliente creado exitosamente.');
+        $this->flashNotification('success', 'Cliente Creado', 'El cliente ha sido creado exitosamente.');
+        return redirect()->route('customer-details.index');
     }
+
     public function show($id)
     {
         $customer = CustomerDetail::with(['company'])->findOrFail($id);
@@ -44,7 +46,7 @@ class CustomerDetailController extends Controller
     public function edit($id)
     {
         $companies = Company::all();
-        $customerDetail = customerDetail::findOrFail($id);
+        $customerDetail = CustomerDetail::findOrFail($id);
         return view('customer-details.edit', compact('customerDetail', 'companies'));
     }
 
@@ -63,16 +65,34 @@ class CustomerDetailController extends Controller
 
         $customerDetail->update($validated);
 
-        return redirect()->route('customer-details.index')
-            ->with('success', 'Cliente actualizado exitosamente.');
+        $this->flashNotification('success', 'Cliente Actualizado', 'El cliente ha sido actualizado exitosamente.');
+        return redirect()->route('customer-details.index');
     }
-
 
     public function destroy(CustomerDetail $customerDetail)
     {
         $customerDetail->delete();
 
-        return redirect()->route('customer-details.index')
-            ->with('success', 'Cliente eliminado exitosamente.');
+        $this->flashNotification('success', 'Cliente Eliminado', 'El cliente ha sido eliminado exitosamente.');
+        return redirect()->route('customer-details.index');
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        $customers = CustomerDetail::where('full_name', 'like', "%{$query}%")
+            ->orWhere('identification', 'like', "%{$query}%")
+            ->get();
+
+        return response()->json($customers);
+    }
+
+    private function flashNotification($type, $title, $message)
+    {
+        session()->flash('notification', [
+            'type' => $type,
+            'title' => $title,
+            'message' => $message
+        ]);
     }
 }
