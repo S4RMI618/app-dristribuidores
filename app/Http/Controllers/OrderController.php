@@ -100,7 +100,7 @@ class OrderController extends Controller
         $order->total = $subtotal + $totalTax;
         $order->save();
 
-        $this->flashNotification('success', 'Orden Creada', 'La orden ha sido actualizada exitosamente.');
+        $this->flashNotification('success', 'Orden Creada', 'La orden ha sido creada exitosamente.');
         return redirect()->route('orders.index');
     }
 

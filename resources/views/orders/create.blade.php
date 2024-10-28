@@ -55,34 +55,44 @@
                             </div>
                         </div>
 
-                        <!-- Template para agregar productos seleccionados -->
                         <template id="product-template">
-                            <div class="product-item flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
-                                <span class="product-name font-medium"></span>
-                                <div class="flex items-center">
-                                    <label for="quantity" class="mr-2">Cantidad:</label>
-                                    <input type="number" name="quantities[]"
-                                        class="quantity-input block w-16 rounded-md border border-gray-300 px-2 py-1"
-                                        min="1" value="1">
+                            <div
+                                class="product-item flex flex-wrap justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
+                                <span class="product-name font-medium w-full text-center text-1xl"></span>
+                                <div class="flex w-full items-center justify-between ">
+                                    <div class="flex items-center">
+                                        <x-input-label for="quantity" class="mr-2">Cantidad:</x-input-label>
+                                        <input type="number" name="quantities[]"
+                                            class="quantity-input block w-16 rounded-md border border-gray-300 px-2 py-1 tex-center"
+                                            min="1" value="1" onchange="updateTotals()">
+                                    </div>
+                                    <div class="product-subtotal font-medium">
+                                        Subtotal: $<span class="subtotal-amount">0.00</span>
+                                    </div>
                                     <input type="hidden" name="products[]" class="product-input">
                                     <input type="hidden" name="product_prices[]" class="product-price-input">
-                                    <button type="button"
-                                        class="remove-product ml-4 text-red-600 hover:text-red-800">Eliminar</button>
+                                    <input type="hidden" class="product-tax-rate" value="">
+                                    <input type="hidden" class="product-base-price" value="">
+                                    <button type="button" class="remove-product text-red-600 hover:text-white hover:bg-red-700 rounded-md p-2 py-1 ml-4"
+                                        onclick="updateTotals()">
+                                        Eliminar
+                                    </button>
                                 </div>
                             </div>
                         </template>
 
                         <!-- Resumen del total de la orden -->
-                        <div id="order_totals" class="mt-6 p-4 bg-gray-100 rounded-md hidden">
-                            <h3 class="text-lg font-semibold">Totales de la Orden</h3>
-                            <div class="mt-2">
-                                <p id="total_base_price">Total Precio Base: $0.00</p>
-                                <p id="total_tax">Total Impuestos: $0.00</p>
-                                <p id="total_price">Total Final: $0.00</p>
+                        <div id="order_totals" class="mt-6">
+                            <x-input-label :value="__('Totales de la Orden')" class="text-center text-xl"/>
+                            <div class="mt-2 space-y-2 p-4 bg-gray-100 rounded-md">
+                                <p id="total_base_price" class="font-semibold">Subtotal: $<span>0.00</span></p>
+                                <p id="total_tax" class="font-semibold">Impuestos: $<span>0.00</span></p>
+                                <p id="total_price" class="font-bold">Total Final: $<span>0.00</span></p>
                             </div>
                         </div>
 
-                        <div class="mt-6">
+
+                        <div class="flex w-full items-center justify-center mt-6 ">
                             <x-primary-button type="submit">{{ __('Crear Orden') }}</x-primary-button>
                         </div>
                     </form>
@@ -149,45 +159,109 @@
             }
         }
 
-        // Función para mostrar los detalles del producto seleccionado
+        // Mostrar los detalles del producto seleccionado
         function showProductDetails(product) {
             selectedProduct = product;
             const basePrice = parseFloat(product.base_price);
             const taxRate = parseFloat(product.tax_rate);
+            const totalPrice = basePrice + (basePrice * taxRate / 100);
 
             document.getElementById('product_name').textContent = `Nombre: ${product.name}`;
             document.getElementById('product_code').textContent = `Código: ${product.code}`;
-            document.getElementById('product_price').textContent =
-                `Precio: $${(basePrice + (basePrice * taxRate) / 100).toFixed(2)}`;
+            document.getElementById('product_price').textContent = `Precio: $${totalPrice.toFixed(2)}`;
 
             document.getElementById('selected_product_details').classList.remove('hidden');
         }
 
-        // Función para agregar productos seleccionados
+        // Agregar productos
         document.getElementById('add_product_button').addEventListener('click', function() {
             if (!selectedProduct) return;
 
-            let template = document.getElementById('product-template').content.cloneNode(true);
+            // Verificar si el producto ya existe en la lista
+            const existingProduct = findExistingProduct(selectedProduct.id);
+            
+            if (existingProduct) {
+                // Incrementar la cantidad del producto existente
+                const quantityInput = existingProduct.querySelector('.quantity-input');
+                quantityInput.value = parseInt(quantityInput.value) + 1;
+                updateTotals();
+            } else {
+                // Crear nuevo elemento para el producto
+                let template = document.getElementById('product-template').content.cloneNode(true);
+                
+                // Set product information
+                template.querySelector('.product-name').textContent = `${selectedProduct.name} - ${selectedProduct.code}`;
+                template.querySelector('.product-input').value = selectedProduct.id;
+                template.querySelector('.product-base-price').value = selectedProduct.base_price;
+                template.querySelector('.product-tax-rate').value = selectedProduct.tax_rate;
+                
+                // Agregar event listener para la cantidad
+                template.querySelector('.quantity-input').addEventListener('change', updateTotals);
+                
+                // Agregar event listener para eliminar
+                template.querySelector('.remove-product').addEventListener('click', function() {
+                    this.closest('.product-item').remove();
+                    updateTotals();
+                });
 
-            // Set product name, ID, and price
-            template.querySelector('.product-name').textContent =
-                `${selectedProduct.name} - ${selectedProduct.code}`;
-            template.querySelector('.product-input').value = selectedProduct.id;
-            template.querySelector('.product-price-input').value = selectedProduct.price;
+                // Agregar al DOM
+                document.getElementById('selected_products_list').appendChild(template);
+                updateTotals();
+            }
 
-            // Eliminar producto de la lista seleccionada
-            template.querySelector('.remove-product').addEventListener('click', function() {
-                this.closest('.product-item').remove();
-            });
-
-            // Agregar al DOM
-            document.getElementById('selected_products_list').appendChild(template);
-
-            // Limpiar los detalles del producto
+            // Limpiar selección
             document.getElementById('selected_product_details').classList.add('hidden');
+            document.getElementById('product_search').value = '';
+            document.getElementById('product_list').innerHTML = '';
             selectedProduct = null;
         });
 
-        
+        // Nueva función para encontrar un producto existente en la lista
+        function findExistingProduct(productId) {
+            const productItems = document.querySelectorAll('.product-item');
+            for (let item of productItems) {
+                const itemProductId = item.querySelector('.product-input').value;
+                if (itemProductId === productId.toString()) {
+                    return item;
+                }
+            }
+            return null;
+        }
+
+        // Nueva función para actualizar todos los totales
+        function updateTotals() {
+            let totalBasePrice = 0;
+            let totalTax = 0;
+            
+            // Recorrer cada producto en la lista
+            document.querySelectorAll('.product-item').forEach(item => {
+                const quantity = parseInt(item.querySelector('.quantity-input').value) || 0;
+                const basePrice = parseFloat(item.querySelector('.product-base-price').value);
+                const taxRate = parseFloat(item.querySelector('.product-tax-rate').value);
+                
+                // Calcular subtotales
+                const subtotalBase = basePrice * quantity;
+                const subtotalTax = (basePrice * taxRate / 100) * quantity;
+                const subtotalTotal = subtotalBase + subtotalTax;
+                
+                // Actualizar subtotal del producto
+                item.querySelector('.subtotal-amount').textContent = subtotalTotal.toFixed(2);
+                
+                // Acumular totales
+                totalBasePrice += subtotalBase;
+                totalTax += subtotalTax;
+            });
+
+            // Actualizar totales generales
+            const totalFinal = totalBasePrice + totalTax;
+            document.querySelector('#total_base_price span').textContent = totalBasePrice.toFixed(2);
+            document.querySelector('#total_tax span').textContent = totalTax.toFixed(2);
+            document.querySelector('#total_price span').textContent = totalFinal.toFixed(2);
+            
+            // Mostrar u ocultar el div de totales
+            document.getElementById('order_totals').style.display = 
+                document.querySelectorAll('.product-item').length > 0 ? 'block' : 'none';
+        }
     </script>
+
 </x-app-layout>
