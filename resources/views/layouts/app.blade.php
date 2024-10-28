@@ -13,8 +13,15 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
     <!-- Scripts -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (app()->environment('local'))
+        <!-- Development -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <!-- Production -->
+        <link rel="stylesheet" href="{{ asset('build/assets/app-?.css') }}">
+        <script src="{{ asset('build/assets/app-?.js') }}" defer></script>
+    @endif
 </head>
 
 <body class="font-sans antialiased">
@@ -59,12 +66,12 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('modalData', {
-                type: '',  // Inicializa valores por defecto
+                type: '', // Inicializa valores por defecto
                 title: '',
                 message: ''
             });
         });
-    
+
         document.addEventListener('DOMContentLoaded', function() {
             window.showNotification = function(type, title, message) {
                 window.dispatchEvent(new CustomEvent('open-modal', {
@@ -78,7 +85,7 @@
             }
         });
     </script>
-    
+
 
     <!-- Stack for additional scripts -->
     @stack('scripts')
