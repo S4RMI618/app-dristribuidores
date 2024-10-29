@@ -100,14 +100,13 @@
             </div>
         </div>
     </div>
-
     <script>
         // Función para filtrar clientes por nombre o identificación
         function filterCustomers() {
             let query = document.getElementById('customer_search').value;
 
             if (query.length > 1) {
-                fetch(`/customers/search?query=${query}`)
+                fetch(`${window.routes.customersSearch}?query=${query}`)
                     .then(response => response.json())
                     .then(data => {
                         let customerList = document.getElementById('customer_list');
@@ -140,7 +139,7 @@
             let query = document.getElementById('product_search').value;
 
             if (query.length > 1) {
-                fetch(`/products/search?query=${query}`)
+                fetch(`${window.routes.productsSearch}?query=${query}`)
                     .then(response => response.json())
                     .then(data => {
                         let productList = document.getElementById('product_list');

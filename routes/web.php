@@ -31,19 +31,21 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class)->middleware([RoleMiddleware::class]);
     Route::resource('customer-details', CustomerDetailController::class);
     Route::resource('orders', OrderController::class);
-
 });
 
-/* Creación de productos */
-Route::post('/products/store', [ProductController::class, 'store'])->name('products.store');   
-Route::get('/products/get', [ProductController::class, 'getProducts'])->name('products.get');
 
-/* Rutas secundarias */
-Route::get('/get-municipalities', [LocationController::class, 'getMunicipalities'])->name('get-municipalities');
-Route::get('/products/search', [ProductController::class, 'searchProducts'])->name('products.search');
+Route::prefix(env('APP_URL_PREFIX', ''))->group(function () {
+    /* Creación de productos */
+    Route::post('/products/store', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/get', [ProductController::class, 'getProducts'])->name('products.get');
+    /* Rutas secundarias */
+    Route::get('/get-municipalities', [LocationController::class, 'getMunicipalities'])->name('get-municipalities');
+    Route::get('/products/search', [ProductController::class, 'searchProducts'])->name('products.search');
 
-/* Busqueda de Customers */
-Route::get('/customers/search', [CustomerDetailController::class, 'search']);
+    /* Busqueda de Customers */
+    Route::get('/customers/search', [CustomerDetailController::class, 'search'])->name('customers.search');
+});
+
 
 
 

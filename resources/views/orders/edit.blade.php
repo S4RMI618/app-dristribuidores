@@ -13,27 +13,29 @@
                         @csrf
                         @method('PUT')
 
-                        <!-- Selección del Cliente -->
-                        <div class="mt-4">
+                        <!-- Buscador interactivo del Cliente -->
+                        <div>
                             <x-input-label for="customer_search" :value="__('Cliente')" />
                             <input type="text" id="customer_search" name="customer_search"
-                                class="block mt-1 w-full rounded-md"
-                                placeholder="Escriba el nombre o identificación del cliente..."
+                                class="block mt-1 w-full rounded-md" placeholder="Buscar por nombre o identificación"
                                 value="{{ $order->customer->full_name }} - {{ $order->customer->identification }}"
                                 oninput="filterCustomers()" />
                             <div id="customer_list" class="mt-2 border border-gray-200 rounded-md overflow-hidden">
                             </div>
+                            <x-input-error :messages="$errors->get('customer_id')" class="mt-2" />
                         </div>
 
-                        <!-- Campo oculto para almacenar el cliente seleccionado -->
+                        <!-- Selección del Cliente -->
                         <input type="hidden" id="customer_id" name="customer_id" value="{{ $order->customer_id }}">
 
                         <!-- Estado de la Orden -->
                         <div class="mt-4">
                             <x-input-label for="status" :value="__('Estado')" />
                             <select id="status" name="status" class="block mt-1 w-full rounded-md p-2" required>
-                                <option value="pendiente" {{ $order->status === 'pendiente' ? 'selected' : '' }}>Pendiente</option>
-                                <option value="facturado" {{ $order->status === 'facturado' ? 'selected' : '' }}>Facturado</option>
+                                <option value="pendiente" {{ $order->status === 'pendiente' ? 'selected' : '' }}>
+                                    Pendiente</option>
+                                <option value="facturado" {{ $order->status === 'facturado' ? 'selected' : '' }}>
+                                    Facturado</option>
                             </select>
                         </div>
 
@@ -41,62 +43,101 @@
                         <div class="mt-4">
                             <x-input-label for="product_search" :value="__('Buscar Productos')" />
                             <input type="text" id="product_search" name="product_search"
-                                class="block mt-1 w-full rounded-md" placeholder="Escriba el producto..."
+                                class="block mt-1 w-full rounded-md" placeholder="Buscar productos..."
                                 oninput="filterProducts()" />
                             <div id="product_list" class="mt-2 border border-gray-200 rounded-md overflow-hidden"></div>
                         </div>
 
-                        <!-- Detalles del producto seleccionado -->
-                        <div id="product_details" class="mt-4 hidden">
-                            <h3 class="text-lg font-medium">{{ __('Agregar Producto') }}</h3>
-                            <div class="mt-2 p-4 border border-gray-200 rounded-md bg-gray-50">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <p class="font-medium" id="selected_product_name"></p>
-                                        <p>Precio: $<span id="selected_product_price"></span></p>
-                                        <p>Impuestos: $<span id="selected_product_tax"></span></p>
-                                        <p>Total: $<span id="selected_product_total"></span></p>
-                                    </div>
-                                    <div>
-                                        <label for="selected_product_quantity" class="block">Cantidad:</label>
-                                        <input type="number" id="selected_product_quantity" name="quantity"
-                                            class="block w-16 rounded-md" min="1" value="1"
-                                            oninput="updateTotal()">
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <button type="button" onclick="addProductToOrder()"
-                                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                        {{ __('Agregar Producto') }}
-                                    </button>
-                                </div>
+                        <!-- Detalles del Producto Seleccionado -->
+                        <div id="selected_product_details" class="mt-4 hidden">
+                            <h3 class="text-lg font-semibold">Detalles del Producto</h3>
+                            <div class="p-4 bg-gray-100 rounded-md">
+                                <p id="product_name" class="font-medium"></p>
+                                <p id="product_code"></p>
+                                <p id="product_price"></p>
+                                <button type="button" id="add_product_button"
+                                    class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md">Agregar Producto</button>
                             </div>
                         </div>
 
-                        <!-- Lista de productos seleccionados -->
+                        <!-- Selección de productos y cantidades -->
                         <div class="mt-4">
                             <x-input-label for="selected_products" :value="__('Productos Seleccionados')" />
-                            <div id="selected_products_list"
-                                class="mt-2 border border-gray-200 rounded-md overflow-hidden">
+                            <div id="selected_products_list" class="block mt-1 w-full rounded-md">
                                 @foreach ($order->products as $product)
-                                    <div class="product-item flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
-                                        <span class="product-name font-medium">{{ $product->name }} - {{ $product->code }}</span>
-                                        <div class="flex items-center">
-                                            <label for="quantity" class="mr-2">Cantidad:</label>
-                                            <input type="number" name="quantities[]"
-                                                class="quantity-input block w-16 rounded-md border border-gray-300 px-2 py-1"
-                                                min="1" value="{{ $product->pivot->quantity }}">
-                                            <input type="hidden" name="products[]" value="{{ $product->id }}"
-                                                class="product-input">
+                                    <div
+                                        class="product-item flex flex-wrap justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
+                                        <span
+                                            class="product-name font-medium w-full text-center text-1xl">{{ $product->name }}
+                                            - {{ $product->code }}</span>
+                                        <div class="flex w-full items-center justify-between">
+                                            <div class="flex items-center">
+                                                <x-input-label for="quantity" class="mr-2">Cantidad:</x-input-label>
+                                                <input type="number" name="quantities[]"
+                                                    class="quantity-input block w-16 rounded-md border border-gray-300 px-2 py-1 tex-center"
+                                                    min="1" value="{{ $product->pivot->quantity }}"
+                                                    onchange="updateTotals()">
+                                            </div>
+                                            <div class="product-subtotal font-medium">
+                                                Subtotal: $<span class="subtotal-amount">0.00</span>
+                                            </div>
+                                            <input type="hidden" name="products[]" class="product-input"
+                                                value="{{ $product->id }}">
+                                            <input type="hidden" name="product_prices[]" class="product-price-input"
+                                                value="{{ $product->base_price }}">
+                                            <input type="hidden" class="product-tax-rate"
+                                                value="{{ $product->tax_rate }}">
+                                            <input type="hidden" class="product-base-price"
+                                                value="{{ $product->base_price }}">
                                             <button type="button"
-                                                class="remove-product ml-4 text-red-600 hover:text-red-800">Eliminar</button>
+                                                class="remove-product text-red-600 hover:text-white hover:bg-red-700 rounded-md p-2 py-1 ml-4"
+                                                onclick="updateTotals()">
+                                                Eliminar
+                                            </button>
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
                         </div>
 
-                        <div class="mt-6">
+                        <template id="product-template">
+                            <div
+                                class="product-item flex flex-wrap justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
+                                <span class="product-name font-medium w-full text-center text-1xl"></span>
+                                <div class="flex w-full items-center justify-between">
+                                    <div class="flex items-center">
+                                        <x-input-label for="quantity" class="mr-2">Cantidad:</x-input-label>
+                                        <input type="number" name="quantities[]"
+                                            class="quantity-input block w-16 rounded-md border border-gray-300 px-2 py-1 tex-center"
+                                            min="1" value="1" onchange="updateTotals()">
+                                    </div>
+                                    <div class="product-subtotal font-medium">
+                                        Subtotal: $<span class="subtotal-amount">0.00</span>
+                                    </div>
+                                    <input type="hidden" name="products[]" class="product-input">
+                                    <input type="hidden" name="product_prices[]" class="product-price-input">
+                                    <input type="hidden" class="product-tax-rate" value="">
+                                    <input type="hidden" class="product-base-price" value="">
+                                    <button type="button"
+                                        class="remove-product text-red-600 hover:text-white hover:bg-red-700 rounded-md p-2 py-1 ml-4"
+                                        onclick="updateTotals()">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Resumen del total de la orden -->
+                        <div id="order_totals" class="mt-6">
+                            <x-input-label :value="__('Totales de la Orden')" class="text-center text-xl" />
+                            <div class="mt-2 space-y-2 p-4 bg-gray-100 rounded-md">
+                                <p id="total_base_price" class="font-semibold">Subtotal: $<span>0.00</span></p>
+                                <p id="total_tax" class="font-semibold">Impuestos: $<span>0.00</span></p>
+                                <p id="total_price" class="font-bold">Total Final: $<span>0.00</span></p>
+                            </div>
+                        </div>
+
+                        <div class="flex w-full items-center justify-center mt-6">
                             <x-primary-button type="submit">{{ __('Actualizar Orden') }}</x-primary-button>
                         </div>
                     </form>
@@ -105,131 +146,170 @@
         </div>
     </div>
 
-    <!-- Template para productos seleccionados -->
-    <template id="product-template">
-        <div class="product-item flex justify-between items-center mt-2 p-2 bg-gray-100 rounded-md">
-            <span class="product-name font-medium"></span>
-            <div class="flex items-center">
-                <label for="quantity" class="mr-2">Cantidad:</label>
-                <input type="number" name="quantities[]"
-                    class="quantity-input block w-16 rounded-md border border-gray-300 px-2 py-1" min="1"
-                    value="1">
-                <input type="hidden" name="products[]" class="product-input">
-                <button type="button" class="remove-product ml-4 text-red-600 hover:text-red-800">Eliminar</button>
-            </div>
-        </div>
-    </template>
-</x-app-layout>
+    <script>
+        updateTotals(); // Llamar a la función para actualizar los totales al cargar la página
+        
+        // Función para filtrar clientes por nombre o identificación
+        function filterCustomers() {
+            let query = document.getElementById('customer_search').value;
 
-<script>
-    let selectedProduct = null;
+            if (query.length > 1) {
+                fetch(`${window.routes.customersSearch}?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let customerList = document.getElementById('customer_list');
+                        customerList.innerHTML = ''; // Limpiar lista anterior
 
-    // Función para filtrar clientes
-    function filterCustomers() {
-        let query = document.getElementById('customer_search').value;
-
-        if (query.length > 1) {
-            fetch(`/customers/search?query=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    let customerList = document.getElementById('customer_list');
-                    customerList.innerHTML = ''; // Limpiar lista anterior
-
-                    data.forEach(customer => {
-                        let div = document.createElement('div');
-                        div.textContent = `${customer.full_name} - ${customer.identification}`;
-                        div.classList.add('p-2', 'cursor-pointer', 'hover:bg-gray-200');
-                        div.addEventListener('click', function() {
-                            selectCustomer(customer);
+                        data.forEach(customer => {
+                            let div = document.createElement('div');
+                            div.textContent = `${customer.full_name} - ${customer.identification}`;
+                            div.classList.add('p-2', 'cursor-pointer', 'hover:bg-gray-200');
+                            div.addEventListener('click', function() {
+                                selectCustomer(customer);
+                            });
+                            customerList.appendChild(div);
                         });
-                        customerList.appendChild(div);
                     });
-                });
+            }
         }
-    }
 
-    // Función para seleccionar cliente
-    function selectCustomer(customer) {
-        document.getElementById('customer_id').value = customer.id;
-        document.getElementById('customer_search').value = `${customer.full_name} - ${customer.identification}`;
-        document.getElementById('customer_list').innerHTML = '';
-    }
+        // Función para seleccionar cliente
+        function selectCustomer(customer) {
+            document.getElementById('customer_search').value = `${customer.full_name} - ${customer.identification}`;
+            document.getElementById('customer_id').value = customer.id;
+            document.getElementById('customer_list').innerHTML = ''; // Limpiar lista
+        }
 
-    // Función para filtrar productos
-    function filterProducts() {
-        let query = document.getElementById('product_search').value;
+        let selectedProduct = null; // Variable para almacenar el producto seleccionado
 
-        if (query.length > 1) {
-            fetch(`/products/search?query=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    let productList = document.getElementById('product_list');
-                    productList.innerHTML = ''; // Limpiar lista anterior
+        // Función para filtrar productos
+        function filterProducts() {
+            let query = document.getElementById('product_search').value;
 
-                    data.forEach(product => {
-                        let div = document.createElement('div');
-                        div.textContent = `${product.name} - ${product.code}`;
-                        div.classList.add('p-2', 'cursor-pointer', 'hover:bg-gray-200');
-                        div.addEventListener('click', function() {
-                            showProductDetails(product);
+            if (query.length > 1) {
+                fetch(`${window.routes.productsSearch}?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let productList = document.getElementById('product_list');
+                        productList.innerHTML = ''; // Limpiar lista anterior
+
+                        data.forEach(product => {
+                            let div = document.createElement('div');
+                            div.textContent = `${product.name} - ${product.code}`;
+                            div.classList.add('p-2', 'cursor-pointer', 'hover:bg-gray-200');
+                            div.addEventListener('click', function() {
+                                showProductDetails(product);
+                            });
+                            productList.appendChild(div);
                         });
-                        productList.appendChild(div);
                     });
+            }
+        }
+
+        // Mostrar los detalles del producto seleccionado
+        function showProductDetails(product) {
+            selectedProduct = product;
+            const basePrice = parseFloat(product.base_price);
+            const taxRate = parseFloat(product.tax_rate);
+            const totalPrice = basePrice + (basePrice * taxRate / 100);
+
+            document.getElementById('product_name').textContent = `Nombre: ${product.name}`;
+            document.getElementById('product_code').textContent = `Código: ${product.code}`;
+            document.getElementById('product_price').textContent = `Precio: $${totalPrice.toFixed(2)}`;
+
+            document.getElementById('selected_product_details').classList.remove('hidden');
+        }
+
+        // Agregar productos
+        document.getElementById('add_product_button').addEventListener('click', function() {
+            if (!selectedProduct) return;
+
+            // Verificar si el producto ya existe en la lista
+            const existingProduct = findExistingProduct(selectedProduct.id);
+
+            if (existingProduct) {
+                // Incrementar la cantidad del producto existente
+                const quantityInput = existingProduct.querySelector('.quantity-input');
+                quantityInput.value = parseInt(quantityInput.value) + 1;
+                updateTotals();
+            } else {
+                // Crear nuevo elemento para el producto
+                let template = document.getElementById('product-template').content.cloneNode(true);
+
+                // Set product information
+                template.querySelector('.product-name').textContent =
+                    `${selectedProduct.name} - ${selectedProduct.code}`;
+                template.querySelector('.product-input').value = selectedProduct.id;
+                template.querySelector('.product-base-price').value = selectedProduct.base_price;
+                template.querySelector('.product-tax-rate').value = selectedProduct.tax_rate;
+
+                // Agregar event listener para la cantidad
+                template.querySelector('.quantity-input').addEventListener('change', updateTotals);
+
+                // Agregar event listener para eliminar
+                template.querySelector('.remove-product').addEventListener('click', function() {
+                    this.closest('.product-item').remove();
+                    updateTotals();
                 });
-        }
-    }
 
-    // Mostrar los detalles del producto seleccionado
-    function showProductDetails(product) {
-        selectedProduct = product;
-        document.getElementById('selected_product_name').textContent = `${product.name} - ${product.code}`;
-        document.getElementById('selected_product_price').textContent = product.base_price;
-        document.getElementById('selected_product_tax').textContent = product.tax_rate;
-        updateTotal();
-        document.getElementById('product_details').classList.remove('hidden');
-    }
+                // Agregar al DOM
+                document.getElementById('selected_products_list').appendChild(template);
+                updateTotals();
+            }
 
-    // Actualizar el total al cambiar la cantidad
-    function updateTotal() {
-        let quantity = document.getElementById('selected_product_quantity').value;
-        let total = (parseFloat(selectedProduct.base_price) + parseFloat(selectedProduct.tax_rate)) * quantity;
-        document.getElementById('selected_product_total').textContent = total.toFixed(2);
-    }
-
-    // Agregar producto a la lista de productos seleccionados
-    function addProductToOrder() {
-        if (!selectedProduct) {
-            console.error('No hay un producto seleccionado');
-            return;
-        }
-
-        let quantity = document.getElementById('selected_product_quantity').value;
-        let selectedProductsList = document.getElementById('selected_products_list');
-
-        let template = document.getElementById('product-template');
-        let newProductItem = document.importNode(template.content, true);
-
-        newProductItem.querySelector('.product-name').textContent = `${selectedProduct.name} - ${selectedProduct.code}`;
-        newProductItem.querySelector('.product-input').value = selectedProduct.id;
-        newProductItem.querySelector('.quantity-input').value = quantity;
-
-        newProductItem.querySelector('.remove-product').addEventListener('click', function() {
-            this.closest('.product-item').remove();
+            // Limpiar selección
+            document.getElementById('selected_product_details').classList.add('hidden');
+            document.getElementById('product_search').value = '';
+            document.getElementById('product_list').innerHTML = '';
+            selectedProduct = null;
         });
 
-        selectedProductsList.appendChild(newProductItem);
-
-        // Limpiar y resetear
-        document.getElementById('product_list').innerHTML = '';
-        document.getElementById('product_search').value = '';
-        document.getElementById('product_details').classList.add('hidden');
-        selectedProduct = null;
-    }
-
-    // Agregar event listener para eliminar productos
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.classList.contains('remove-product')) {
-            e.target.closest('.product-item').remove();
+        // Nueva función para encontrar un producto existente en la lista
+        function findExistingProduct(productId) {
+            const productItems = document.querySelectorAll('.product-item');
+            for (let item of productItems) {
+                const itemProductId = item.querySelector('.product-input').value;
+                if (itemProductId === productId.toString()) {
+                    return item;
+                }
+            }
+            return null;
         }
-    });
-</script>
+
+        // Nueva función para actualizar todos los totales
+        function updateTotals() {
+            let totalBasePrice = 0;
+            let totalTax = 0;
+
+            // Recorrer cada producto en la lista
+            document.querySelectorAll('.product-item').forEach(item => {
+                const quantity = parseInt(item.querySelector('.quantity-input').value) || 0;
+                const basePrice = parseFloat(item.querySelector('.product-base-price').value);
+                const taxRate = parseFloat(item.querySelector('.product-tax-rate').value);
+
+                // Calcular subtotales
+                const subtotalBase = basePrice * quantity;
+                const subtotalTax = (basePrice * taxRate / 100) * quantity;
+                const subtotalTotal = subtotalBase + subtotalTax;
+
+                // Actualizar subtotal del producto
+                item.querySelector('.subtotal-amount').textContent = subtotalTotal.toFixed(2);
+
+                // Acumular totales
+                totalBasePrice += subtotalBase;
+                totalTax += subtotalTax;
+            });
+
+            // Actualizar totales generales
+            const totalFinal = totalBasePrice + totalTax;
+            document.querySelector('#total_base_price span').textContent = totalBasePrice.toFixed(2);
+            document.querySelector('#total_tax span').textContent = totalTax.toFixed(2);
+            document.querySelector('#total_price span').textContent = totalFinal.toFixed(2);
+
+            // Mostrar u ocultar el div de totales
+            document.getElementById('order_totals').style.display =
+                document.querySelectorAll('.product-item').length > 0 ? 'block' : 'none';
+        }
+    </script>
+
+</x-app-layout>
