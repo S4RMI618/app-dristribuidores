@@ -19,16 +19,16 @@
                     <!-- Mostrar solo si el usuario es Administrador (role_id = 1) -->
                     @if (Auth::user()->role_id === 1)
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
-                            {{ __('Users') }}
+                            {{ __('Usuarios') }}
                         </x-nav-link>
                         <x-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.index')">
-                            {{ __('Companies') }}
+                            {{ __('Compañias') }}
                         </x-nav-link>
                         <x-nav-link :href="route('customer-details.index')" :active="request()->routeIs('customer-details.index')">
-                            {{ __('Customers') }}
+                            {{ __('Clientes') }}
                         </x-nav-link>
                         <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')">
-                            {{ __('Orders') }}
+                            {{ __('Órdenes') }}
                         </x-nav-link>
                     @endif
 
@@ -38,7 +38,7 @@
                             {{ __('Customers') }}
                         </x-nav-link>
                         <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')">
-                            {{ __('Orders') }}
+                            {{ __('Órdenes') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -99,23 +99,23 @@
             <!-- Mostrar solo si es Administrador -->
             @if (Auth::user()->role_id === 1)
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
-                    {{ __('Users') }}
+                    {{ __('Usuarios') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.index')">
-                    {{ __('Companies') }}
+                    {{ __('Compañias') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('customer-details.index')" :active="request()->routeIs('customer-details.index')">
-                    {{ __('Customers') }}
+                    {{ __('Clientes') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')">
-                    {{ __('Orders') }}
+                    {{ __('Órdenes') }}
                 </x-responsive-nav-link>
             @endif
 
             <!-- Mostrar solo si es Distribuidor -->
             @if (Auth::user()->role_id === 2)
                 <x-responsive-nav-link :href="route('customer-details.index')" :active="request()->routeIs('customer-details.index')">
-                    {{ __('Customers') }}
+                    {{ __('Clientes') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')">
                     {{ __('Orders') }}
