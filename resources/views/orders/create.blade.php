@@ -105,8 +105,9 @@
         function filterCustomers() {
             let query = document.getElementById('customer_search').value;
 
+            const customerRoute = @json(route('customers.search'));
             if (query.length > 1) {
-                fetch(`${window.routes.customersSearch}?query=${query}`)
+                fetch(`${customerRoute}?query=${query}`)
                     .then(response => response.json())
                     .then(data => {
                         let customerList = document.getElementById('customer_list');
@@ -137,9 +138,10 @@
         // Función para filtrar productos
         function filterProducts() {
             let query = document.getElementById('product_search').value;
-
+            const productsRoute = @json(route('products.search'));
+            
             if (query.length > 1) {
-                fetch(`${window.routes.productsSearch}?query=${query}`)
+                fetch(`${productsRoute}?query=${query}`)
                     .then(response => response.json())
                     .then(data => {
                         let productList = document.getElementById('product_list');
