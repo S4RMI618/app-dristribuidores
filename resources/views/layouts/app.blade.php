@@ -19,8 +19,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else
         <!-- Production -->
-        <link rel="stylesheet" href="{{ asset('build/assets/app-?.css') }}">
-        <script src="{{ asset('build/assets/app-?.js') }}" defer></script>
+        @vite(['resources/css/app.css', 'resources/js/app.js'], 'build')
     @endif
 </head>
 
