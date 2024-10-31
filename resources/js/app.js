@@ -1,9 +1,9 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
-import routes from './routesConfig'
+/* import routes from './routesConfig'
 
-window.routes = routes;
+window.routes = routes; */
 
 window.Alpine = Alpine;
 
